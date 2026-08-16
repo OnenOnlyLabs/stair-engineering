@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.DS_Store
+README.ko.md
+CLAUDE.md
+AGENTS.md
+.cursorrules
+GEMINI.md
+Modelfile
+stairs.html

@@ -1,0 +1,6 @@
+# routing table — file | comma-separated keywords
+# matching: case-insensitive substring. "rank" matches "ranking" and "rank check"; spaces inside a keyword are literal.
+# a request may hit several rooms; the loader returns the top 2 by number of keyword hits.
+201-ads.md | index, indexing, ranking, rank, keyword, search result, 색인, 순위, 키워드, 노출
+202-writing.md | write, draft, article, blog, copy, edit, 글, 원고, 블로그, 초안, 문장
+204-system.md | wiring, layer, stair, loader, how does this work, 배선, 층, 계단, 로더, 구조
