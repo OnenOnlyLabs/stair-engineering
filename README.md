@@ -30,12 +30,13 @@ Anything in there that outlives the task gets promoted upstairs — a fact to a 
 
 Everything above Layer 1 is reachable by *address* ("Room 201, section Indexing"), never by scrolling.
 
-## The whole staircase in 55 seconds
+## The whole staircase in 53 seconds
 
-[![Watch on YouTube](docs/video/poster.jpg)](https://youtu.be/52ZHKbmZXEw)
+[![Watch on YouTube](docs/video/poster.jpg)](https://youtu.be/A4VtYjtrCVU)
 
 The page that grows until lines fall off the end · rooms opened by number, one section at a time ·
 the note that belongs to one chat and no other · the checker that finds a room nothing points to.
+Every command and every screen in it is real output from the tools in this repo.
 Korean narration, Korean + English subtitles. A vertical cut is at [youtu.be/JA4eQtFKzkw](https://youtu.be/JA4eQtFKzkw).
 
 ## Who this is for
