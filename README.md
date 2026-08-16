@@ -32,10 +32,11 @@ Everything above Layer 1 is reachable by *address* ("Room 201, section Indexing"
 
 ## The whole staircase in 55 seconds
 
-<img src="docs/video/stair.gif" width="330" alt="Stair Engineering — the page that grows until lines fall off it, rooms opened by number, the note that belongs to one chat, and the checker that catches an orphaned room">
+[![Watch on YouTube](docs/video/poster.jpg)](https://youtu.be/52ZHKbmZXEw)
 
 The page that grows until lines fall off the end · rooms opened by number, one section at a time ·
 the note that belongs to one chat and no other · the checker that finds a room nothing points to.
+Korean narration, Korean + English subtitles. A vertical cut is at [youtu.be/JA4eQtFKzkw](https://youtu.be/JA4eQtFKzkw).
 
 ## Who this is for
 
