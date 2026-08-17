@@ -57,3 +57,33 @@ use it for a new file only.
 
 **Tools with no project file** (Ollama, LM Studio, raw API, chat UIs): run `python3 tools/stair_load.py`
 and paste the output into the system-prompt box. Re-paste after you change Layer 1.
+
+## Layer 4 — delivering recent work at session start
+
+Layer 1 through 3 are files the agent loads. Layer 4 is what your harness *injects*, and the piece worth
+injecting on purpose is what the agent changed recently — a long session compacts itself, and everything
+before the fold is gone without anyone pressing anything.
+
+Print this into the model's context at session start (and at compaction, if your tool exposes it):
+
+```bash
+python3 tools/recent_work.py --repo . --ledger CHANGELOG.md
+```
+
+**Claude Code** — a `SessionStart` hook in `.claude/settings.json`; it fires on start, resume, clear and
+compact, which is exactly the set of moments the agent goes blank:
+
+```json
+{ "hooks": { "SessionStart": [ { "hooks": [ { "type": "command",
+  "command": "python3 tools/recent_work.py --ledger CHANGELOG.md" } ] } ] } }
+```
+
+**Codex CLI / Cursor / Gemini CLI** — no session hook. Run the command yourself and paste the block, or
+have your wrapper script prepend it to the first message of each session.
+
+**Any harness you control** — prepend the output to the system prompt you assemble. It is ~12 lines.
+
+Two things to check once it is wired:
+- The block appears on a *resumed* session, not just a fresh one. Resuming is where the loss actually happens.
+- Non-ASCII paths render as text, not octal escapes. If you wrote your own generator, pass
+  `-c core.quotepath=false` to git — without it the escaped path also defeats extension filters.

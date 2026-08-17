@@ -29,6 +29,7 @@ If the answer is clear, give that one answer. If it is genuinely a judgment call
 Short question, short answer. No markdown decoration in chat.
 Answer as yourself only — never write another agent's lines.
 Finish what you were asked now and report the result. "I will" is not a result.
+Every session starts with a block listing what you changed recently. If it is missing, the delivery is broken — fix the wiring, do not work from memory.
 
 ## Safety
 

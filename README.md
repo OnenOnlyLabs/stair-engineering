@@ -21,6 +21,35 @@ Layer 0   this chat      what THIS thread is working on — one file per chat, n
 Layer 4 is the one people miss. You trim your prompt file and the context is still huge, because the harness is
 quietly adding a date line, a tool schema and three turns of history every call. Count it, or it eats the savings.
 
+Then **fill it**. Layer 4 is not only a tax to measure — it is the only layer that can hand the agent something
+which is neither an always-true rule nor a room it knows to open. Recent history is exactly that shape: what you
+changed three hours ago is not a rule, so it does not belong on Layer 1, and the agent has no reason to go looking
+for it, so Layer 2 never reaches it. Left unfilled, that gap has a specific symptom — the agent cannot recall its
+own recent work, and neither of you can see why, because a long session folds itself without anyone pressing
+anything. Ours had folded nine times across six days while its owner assumed nothing had been cleared.
+
+The fix is not to remember harder. It is to make the harness deliver, on every session start **and every compaction**
+— the two moments the agent goes blank:
+
+```
+🧠 [last 36h you touched — most recent first]
+  scripts/recent_work.py · personas/slime.md · CLAUDE.md · personas/agtower.md
+  📒 <last few ledger entries>
+```
+
+Four things make this cheap rather than another thing to maintain:
+- **Read, don't store.** Generate it from version control at injection time. Nothing new accumulates,
+  and the log is complete without anyone's discipline.
+- **Most-recent-first, not most-frequent.** Frequency ranks your changelog and notes files at the top and
+  pushes the file you just edited off the list — the opposite of what jogs memory.
+- **Widen when empty, not when old.** Below a handful of hits, reach back further (three days, then a week).
+  A blank block reads as "nothing happened", which returns you to the original failure.
+- **Fixed read cost.** Always a bounded window, so the block stays ~12 lines however long the history grows.
+
+The generator is code, not a floor: what it emits is Layer 4, the rule that the block must appear belongs on
+Layer 1, and how to run it belongs in a Layer 2 room. If yours is missing, that is the delivery breaking —
+go fix the wiring rather than trying to hold the history in your head.
+
 Layer 0 is the one people need but rarely write down. You keep more than one chat open with your agent —
 one refactoring auth, one writing docs, one chasing a bug. Each thread has its own state: what was decided,
 what was ruled out, where it stopped. That state cannot go in Layer 1, because every other chat would then
