@@ -48,6 +48,19 @@ Four rules, each of which was a bug first:
   "nothing happened" — straight back to the original failure.
 - **Fixed read cost.** A bounded window, so the block stays ~12 lines however long history grows.
 
+Three more failures show up the moment you build this, and none of them raise anything:
+- **Bound the block by time, not by count.** A count-based window keeps delivering last week once the
+  log goes quiet. After three idle days, three-day-old work arrives labelled *recent* — and a stale
+  block is worse than an empty one, because it reads as current.
+- **When a record is too long to keep whole, keep the tail.** Answers carry their framing at the front
+  and their decision at the end; truncate from the front and every entry becomes a preamble.
+- **Log what the agent was asked, not the envelope it arrived in.** Recipient lists and routing headers
+  are prepended by your dispatcher, so a head-truncated record can preserve the wrapper and lose the
+  entire question.
+
+Layer 4 fails quietly by nature. The block still renders; only its contents go stale. Nothing throws,
+so nothing appears in the logs — which is why the checks belong in a tool, not in a page of advice.
+
 The generator is code, not a floor. What it prints is Layer 4; the rule that the block must appear belongs
 on Layer 1; how to run it belongs in a Layer 2 room.
 
@@ -55,7 +68,21 @@ on Layer 1; how to run it belongs in a Layer 2 room.
 Only if it uses tools, and only if you check where they are logged. The conversation and the tool calls
 usually live in different stores, and injecting just the conversation gives you an agent that remembers
 every word and none of its own work — it re-runs finished commands and retries failed approaches. Collapse
-consecutive repeats to one line, keep it to about six, and close with "do not repeat what is listed here".
+consecutive repeats to one line and keep it to about six.
+
+Two things decide whether this block helps or hurts, and both are about *what* you put in it.
+
+A command log records that a call was **made**, not that it **worked**. An agent that reads "submitted
+the render job" with no outcome attached will report the job as done more confidently than if it had
+read nothing at all — you strengthen the confabulation instead of correcting it. So log outcomes:
+a success flag, the artifact path, the exit code. You can drop the successes entirely, since the
+artifact is already the evidence, and keep only what failed.
+
+A command log is also a cache with no invalidation. "Read that file twenty minutes ago" is offered as
+history and taken as current state, and in the meantime the file changed. Prefer **state changes**
+("config rewritten at 10:20") over **actions** ("listed the directory"): a state change has a long
+useful life and costs real work to re-verify, while re-running a cheap read costs nothing. Anything
+cheap to redo does not need to be in the block at all.
 
 Other things worth injecting here rather than hard-coding: the current branch, whether the working tree is
 dirty, and which environment the agent is pointed at. All situational, all cheap, all wrong to memorize.
