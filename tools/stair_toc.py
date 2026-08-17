@@ -123,6 +123,34 @@ def check():
         if not (L2 / fn).exists():
             print(f"DEAD ROUTE  {fn} — referenced but the file does not exist")
             bad += 1
+    # A stale TOC is the quietest failure in the whole system: the agent reads the corridor,
+    # the new section is not listed, and it concludes the knowledge does not exist. Nothing
+    # errors — the room is simply invisible. So compare the listed sections to the real ones.
+    for p in sorted(L2.glob("*.md")):
+        text = p.read_text(encoding="utf-8")
+        if "<!-- toc -->" not in text:
+            print(f"NO TOC  {p.name} — agents must open the whole file; run: stair_toc.py toc --apply")
+            bad += 1
+            continue
+        # Compare by prefix, not by splitting on the em dash. A TOC line is
+        # "- <heading> — <snippet>…", and headings may themselves contain an em dash
+        # ("## Indexing — is the page in the index at all"), so splitting on the first one
+        # truncates the heading and every such section reads as missing. That false alarm is
+        # worse than no check: you learn to ignore the output.
+        listed = [ln.strip()[2:].strip()
+                  for ln in text.split("<!-- toc -->", 1)[1].split("<!-- /toc -->", 1)[0].splitlines()
+                  if ln.strip().startswith("- ")]
+        actual = [ln[3:].strip() for ln in text.splitlines() if ln.startswith("## ")]
+        for h in actual:
+            if not any(entry.startswith(h) for entry in listed):
+                print(f"STALE TOC  {p.name} — section \"{h}\" exists but is not in the TOC")
+                print("           agents read the TOC first, so that section is invisible; "
+                      "run: stair_toc.py toc --apply")
+                bad += 1
+        for entry in listed:
+            if not any(entry.startswith(h) for h in actual):
+                print(f"STALE TOC  {p.name} — TOC lists \"{entry[:40]}\" but no such section exists")
+                bad += 1
     if L1.exists():
         for lineno, snippet, marker in layer1_identity_warnings(l1):
             print(f"IDENTITY IN L1  MEMORY.md:{lineno} — \"{snippet}\" (matched \"{marker}\")")

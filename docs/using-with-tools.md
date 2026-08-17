@@ -87,3 +87,19 @@ Two things to check once it is wired:
 - The block appears on a *resumed* session, not just a fresh one. Resuming is where the loss actually happens.
 - Non-ASCII paths render as text, not octal escapes. If you wrote your own generator, pass
   `-c core.quotepath=false` to git — without it the escaped path also defeats extension filters.
+
+## Layer 0 — a note per chat, half of it automatic
+
+```bash
+python3 tools/chat_note.py --note <thread-name> --start   # session start: creates, stamps, prints
+python3 tools/chat_note.py --note <thread-name> --touch   # after each turn: refreshes the auto block
+python3 tools/chat_note.py --list
+```
+
+Wire `--start` next to `recent_work.py` in your session-start hook, and `--touch` to whatever fires when a
+turn ends (Claude Code: a `Stop` hook). Only the block between the `LAYER0:AUTO` markers is rewritten, so
+the agent's own notes are never clobbered.
+
+On Windows use `python` instead of `python3`. Both tools force UTF-8 output, so a legacy console code page
+cannot silently swallow the block — an important detail, since a swallowed block looks exactly like
+"nothing happened".

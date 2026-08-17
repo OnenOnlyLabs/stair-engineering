@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -119,6 +120,15 @@ def digest(repo: Path, ledger: Path | None, hours: int = 36,
 
 
 def main() -> int:
+    # Windows consoles default to a legacy code page (cp1252/cp949), where printing the emoji
+    # markers below raises UnicodeEncodeError and the whole block is lost — the exact silent
+    # failure this tool exists to prevent. Force UTF-8 on the way out.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
     ap = argparse.ArgumentParser(description="Layer 4: deliver recent work back to the agent.")
     ap.add_argument("--repo", default=".", help="git repository to read (default: cwd)")
     ap.add_argument("--ledger", default="", help="changelog/decision log for the 'why' lines")
@@ -128,6 +138,9 @@ def main() -> int:
     a = ap.parse_args()
 
     repo = Path(a.repo).resolve()
+    if not shutil.which("git"):
+        print("git is not on PATH — this tool reads history from git", file=sys.stderr)
+        return 1
     if not (repo / ".git").exists() and not git(repo, "rev-parse", "--git-dir"):
         print(f"not a git repository: {repo}", file=sys.stderr)
         return 1

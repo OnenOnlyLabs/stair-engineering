@@ -57,6 +57,21 @@ read it on every call; and it is not knowledge, because it expires the day the t
 a file that only it ever sees, and when the context window resets you hand the thread back its own file.
 Anything in there that outlives the task gets promoted upstairs — a fact to a room, a rule to Layer 1.
 
+The reason Layer 0 goes unwritten is not disagreement — it is that writing it is a chore at the exact moment
+you are trying to finish something else. So split it and automate the half that can be: which files this
+thread touched and when it was last active are mechanical, while the goal, the decisions and — most
+valuable — what was *ruled out* are the agent's to write. `tools/chat_note.py` keeps the mechanical block
+current and never touches your prose:
+
+```bash
+python3 tools/chat_note.py --note auth-refactor --start    # print at session start
+python3 tools/chat_note.py --note auth-refactor --touch    # after a turn; cheap, run it often
+python3 tools/chat_note.py --note auth-refactor --append "ruled out: session cookies, SSR breaks"
+```
+
+Write the ruled-out lines especially. Without them the next session proposes the thing you already
+rejected, and you spend the same hour twice.
+
 Everything above Layer 1 is reachable by *address* ("Room 201, section Indexing"), never by scrolling.
 
 ## The whole staircase in 53 seconds

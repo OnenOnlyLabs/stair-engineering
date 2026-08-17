@@ -192,8 +192,13 @@ def do_install(target, layer1_text, root, dry_run=False):
         new = old + sep + block + "\n"
         action = "added"
     if dry_run:
-        print(f"[dry-run] would have {action} the stair block in {p} "
-              f"({len(block)} chars; your other {len(old)} chars are kept)")
+        # Say "no change" when there is none. A dry-run that always claims it would write is
+        # useless for the thing you actually run it for: checking whether anything drifted.
+        if new == old:
+            print(f"[dry-run] {p} is already in sync ({len(block)} chars)")
+        else:
+            print(f"[dry-run] would have {action} the stair block in {p} "
+                  f"({len(block)} chars; your other {len(old)} chars are kept)")
         return 0
     p.write_text(new, encoding="utf-8")
     print(f"{action} the stair block in {p} ({len(block)} chars kept in sync with stairs/layer1)")
