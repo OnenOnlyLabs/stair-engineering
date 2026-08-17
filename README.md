@@ -75,7 +75,8 @@ git clone https://github.com/OnenOnlyLabs/stair-engineering /tmp/stairs
 cp -r /tmp/stairs/stairs /tmp/stairs/tools ~/your-project/     # the stairs and the two tools, nothing else
 cd ~/your-project
 # Windows (PowerShell):  Copy-Item -Recurse C:\tmp\stairs\stairs,C:\tmp\stairs\tools C:\your-project\ ; cd C:\your-project
-python3 tools/stair_load.py                          # Layer 1 — paste this into your system prompt
+python3 tools/stair_load.py --install CLAUDE.md      # ★ put the stair into the file your agent reads EVERY call
+python3 tools/stair_load.py                          # Layer 1 — or paste it into your system prompt yourself
 python3 tools/stair_load.py --agent researcher       # + an identity card
 python3 tools/stair_load.py --route "check ranking"  # + the right room's TOC, picked by keywords
 python3 tools/stair_load.py --room 201 --section indexing   # + exactly one section
@@ -91,9 +92,18 @@ Then make the stairs yours: [`docs/creating-your-memory.md`](docs/creating-your-
 
 ## Use it with your tool
 
-- **Claude Code** — `python3 tools/stair_load.py --agent builder --out CLAUDE.md`. Rooms on demand: tell Claude to run the loader with `--room`.
-- **Codex CLI / OpenAI agents** — same, `--out AGENTS.md`.
-- **Cursor / VS Code agents** — into `.cursorrules` or your rules file.
+- **Claude Code** — `python3 tools/stair_load.py --install CLAUDE.md`
+- **Codex CLI / OpenAI agents** — `--install AGENTS.md`
+- **Cursor / VS Code agents** — `--install .cursorrules`
+
+`--install` **appends a managed block** between `STAIR:BEGIN` / `STAIR:END` markers — your existing rules
+are kept, and re-running refreshes only that block. Use `--dry-run` first if you want to see the change.
+(`--out FILE` still exists and **overwrites** the file; use it for a fresh file, not for a CLAUDE.md you already have.)
+
+★ Why this matters more than it looks: the block also tells the agent **how to open the other layers**
+(`--route`, `--room`, `--agent`). Without it the agent holds Layer 1 and never learns that rooms exist —
+it keeps answering from memory. We shipped this repo for weeks before noticing our own agent had never been
+told; the staircase was in the project, not in the file the agent actually read.
 - **Gemini CLI / Antigravity** — into the project context file your tool reads.
 - **Ollama / LM Studio / raw API** — put the loader output in the `system` message. For local models Layer 1 size matters even more; keep it under ~3 KB.
 - **Any chat UI without a file system** — paste Layer 1 once as custom instructions; paste a room's section when the task needs it.

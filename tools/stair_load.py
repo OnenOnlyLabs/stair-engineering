@@ -104,6 +104,75 @@ def route(query):
     return [fn for _, fn in sorted(scored, reverse=True)[:2]]
 
 
+
+# ── --install ────────────────────────────────────────────────────────────────
+# Why this exists: the loader could always write Layer 1 with `--out CLAUDE.md`,
+# but that OVERWRITES the file. Nobody runs that on a CLAUDE.md they already have,
+# so in practice the stair never reaches the one file the agent actually reads
+# every call — and the agent keeps working from memory. That happened to us.
+# `--install` appends a managed block instead, and re-running replaces just that
+# block. Your own rules above and below it are never touched.
+BEGIN = "<!-- STAIR:BEGIN — managed by tools/stair_load.py --install; edit stairs/, not here -->"
+END = "<!-- STAIR:END -->"
+
+
+def install_block(layer1_text, root):
+    """The block we keep in the agent's always-read file."""
+    return "\n".join([
+        BEGIN,
+        "## Stair — read this first",
+        "",
+        "This project keeps the agent's context on a staircase. You are holding Layer 1 only.",
+        "Everything else is opened **by address**, when you need it — never by scrolling.",
+        "",
+        "```",
+        "Layer 4  runtime    what the harness injects every call (date, tools, recent turns)",
+        "Layer 3  identity   one card per role — who you are, how you speak",
+        "Layer 2  knowledge  rooms by address (201, 202 …) — open one section at a time",
+        "Layer 1  memory     this page — always loaded",
+        "Layer 0  this chat  what THIS thread is doing — never auto-loaded",
+        "```",
+        "",
+        "**When you need something that is not on this page, run the loader — do not guess:**",
+        "",
+        "```bash",
+        f"python3 {root}/tools/stair_load.py --route \"<what you need, in your own words>\"",
+        f"python3 {root}/tools/stair_load.py --room 201 --section indexing",
+        f"python3 {root}/tools/stair_load.py --agent builder      # an identity card (Layer 3)",
+        "```",
+        "",
+        "Identity lives in Layer 3, not here. This page holds only what every role shares.",
+        "",
+        "### Layer 1",
+        "",
+        layer1_text.strip(),
+        END,
+    ])
+
+
+def do_install(target, layer1_text, root, dry_run=False):
+    block = install_block(layer1_text, root)
+    p = Path(target)
+    old = p.read_text(encoding="utf-8") if p.exists() else ""
+    if BEGIN in old and END in old:
+        head, rest = old.split(BEGIN, 1)
+        _, tail = rest.split(END, 1)
+        new = head + block + tail
+        action = "updated"
+    else:
+        sep = "" if not old or old.endswith("\n\n") else ("\n" if old.endswith("\n") else "\n\n")
+        new = old + sep + block + "\n"
+        action = "added"
+    if dry_run:
+        print(f"[dry-run] would have {action} the stair block in {p} "
+              f"({len(block)} chars; your other {len(old)} chars are kept)")
+        return 0
+    p.write_text(new, encoding="utf-8")
+    print(f"{action} the stair block in {p} ({len(block)} chars kept in sync with stairs/layer1)")
+    print("re-run this after you edit Layer 1; your own text outside the markers is never touched")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--chat", help="Layer 0 note for THIS chat only (file stem under stairs/layer0/) — never loaded unless you ask")
@@ -112,6 +181,11 @@ def main():
     ap.add_argument("--section", help="only this section of the room (title substring)")
     ap.add_argument("--route", help="pick rooms by keywords in this text")
     ap.add_argument("--full", action="store_true", help="with --room: print the whole file, not just the TOC")
+    ap.add_argument("--install", metavar="FILE",
+                    help="put Layer 1 + the routing rules into the file your agent reads every call "
+                         "(CLAUDE.md / AGENTS.md / .cursorrules). Appends a managed block — your own text is kept. "
+                         "Re-run to refresh it.")
+    ap.add_argument("--dry-run", action="store_true", help="with --install: show what would change, write nothing")
     ap.add_argument("--out", help="write the result to this file as UTF-8 (use this on Windows: PowerShell's > redirection saves UTF-16)")
     a = ap.parse_args()
 
@@ -119,7 +193,14 @@ def main():
     parts = []
     if not L1.exists():
         sys.exit(f"missing {L1} — Layer 1 is the one file you must have")
-    parts.append(L1.read_text(encoding="utf-8").strip())
+    l1_text = L1.read_text(encoding="utf-8").strip()
+    if a.install:
+        try:
+            root = ROOT.relative_to(Path.cwd())
+        except Exception:
+            root = ROOT
+        sys.exit(do_install(a.install, l1_text, root, a.dry_run))
+    parts.append(l1_text)
 
     if a.chat:
         p = L0 / f"{a.chat}.md"
