@@ -71,6 +71,42 @@ def apply(path, write):
     return ("wrote" if write else "would write") + f" ({t.count(chr(10)) - 1} sections)"
 
 
+
+# ── Layer 1 must not hold identity ────────────────────────────────────────────
+# Why this check exists: the person who *wrote* this method got it wrong first.
+# Applying the stair to a second system, they put the persona ("you are X, you
+# speak like Y") into Layer 1. It looks harmless — until you have two roles.
+# Then the same safety rules are duplicated in both cards, and you cannot edit a
+# tone without touching a rule. Identity is Layer 3. Layer 1 is what EVERY role
+# shares. A spec that is merely correct does not stop this; a check does.
+IDENTITY_MARKERS = [
+    "you are ", "너는 ", "당신은 ",
+    "tone:", "말투", "성격", "persona", "페르소나",
+    "speak like", "말해라", "말투는",
+]
+
+
+# A line that *points at* layer 3 belongs in layer 1 — that is the routing entry,
+# not an identity card. Only flag lines that try to BE the card.
+POINTER_MARKERS = ["layer 3", "layer3", "3층", "layer 0", "layer0", "0층"]
+
+
+def layer1_identity_warnings(text):
+    """Return the lines in Layer 1 that look like an identity card."""
+    hits = []
+    for i, ln in enumerate(text.splitlines(), 1):
+        low = ln.strip().lower()
+        if not low or low.startswith("#"):
+            continue
+        if any(pm in low for pm in POINTER_MARKERS):
+            continue
+        for m in IDENTITY_MARKERS:
+            if m in low:
+                hits.append((i, ln.strip()[:70], m.strip()))
+                break
+    return hits
+
+
 def check():
     bad = 0
     l1 = L1.read_text(encoding="utf-8") if L1.exists() else ""
@@ -88,6 +124,10 @@ def check():
             print(f"DEAD ROUTE  {fn} — referenced but the file does not exist")
             bad += 1
     if L1.exists():
+        for lineno, snippet, marker in layer1_identity_warnings(l1):
+            print(f"IDENTITY IN L1  MEMORY.md:{lineno} — \"{snippet}\" (matched \"{marker}\")")
+            print("                identity belongs in layer3; layer1 is what every role shares")
+            bad += 1
         n = L1.stat().st_size
         hint = "" if n < 3000 else ("  (over ~3 KB — too big for most local models; move a section into a room)" if n < 10000
                                     else "  (over ~10 KB — even cloud models skim at this size; move sections into rooms)")

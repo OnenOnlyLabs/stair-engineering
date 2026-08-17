@@ -128,6 +128,25 @@ a staircase with an empty floor is worse than a shorter staircase.
 5. **Layer 0 never leaks upward.** One chat's notes are loaded by that chat only (`--chat <name>`), and are deleted when the work ships. What survives gets promoted to a room or to Layer 1 first. `check` warns when a chat note passes 8 KB, which almost always means something in it should have moved.
 6. **One canonical copy.** If you run agents on several machines, one machine owns the stairs and pushes copies. Verify by count after each push. (We learned this the hard way — see Known limits.)
 
+## The mistake everyone makes first (we made it too)
+
+You will be tempted to put the persona into Layer 1. "You are the assistant, you speak briefly" —
+it feels like it belongs with the other always-on rules. It does not.
+
+We got this wrong ourselves. Applying the stair to a second system, we put the role card in Layer 1.
+It looked fine with one role. With two, the same safety rules were copied into both cards, and changing
+a tone meant editing a file full of rules that had nothing to do with tone.
+
+**Identity is Layer 3. Layer 1 is only what every role shares.**
+
+| goes in Layer 1 | goes in Layer 3 |
+|---|---|
+| honesty rule, confirm-before-destructive, who the users are, output format | who this role is, how it speaks, what it is for |
+| identical for every role | different per role |
+
+`stair_toc.py check` now flags identity-looking lines in Layer 1, because a spec that is merely correct
+does not stop this — a check does. A line that *points at* Layer 3 is fine; a line that tries to *be* the card is not.
+
 ## Known limits (please read before you clone this into production)
 
 - **Layer 1 will try to grow.** Every incident adds "one more line". Set a soft budget and audit it; the tool only *shows* the size, it does not stop you.
