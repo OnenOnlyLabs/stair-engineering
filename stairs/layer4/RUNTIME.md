@@ -51,5 +51,11 @@ Four rules, each of which was a bug first:
 The generator is code, not a floor. What it prints is Layer 4; the rule that the block must appear belongs
 on Layer 1; how to run it belongs in a Layer 2 room.
 
+**Recent actions — what this agent actually ran.**
+Only if it uses tools, and only if you check where they are logged. The conversation and the tool calls
+usually live in different stores, and injecting just the conversation gives you an agent that remembers
+every word and none of its own work — it re-runs finished commands and retries failed approaches. Collapse
+consecutive repeats to one line, keep it to about six, and close with "do not repeat what is listed here".
+
 Other things worth injecting here rather than hard-coding: the current branch, whether the working tree is
 dirty, and which environment the agent is pointed at. All situational, all cheap, all wrong to memorize.

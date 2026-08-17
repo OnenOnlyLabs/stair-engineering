@@ -50,6 +50,15 @@ The generator is code, not a floor: what it emits is Layer 4, the rule that the 
 Layer 1, and how to run it belongs in a Layer 2 room. If yours is missing, that is the delivery breaking —
 go fix the wiring rather than trying to hold the history in your head.
 
+**If your agent uses tools, check where its actions are stored.** Chat history and action history are usually
+two different stores — the conversation in one table, the tool calls your harness logged in another — and it
+is easy to inject only the first. The agent then remembers everything that was *said* and nothing it actually
+*did*, so it re-runs commands it already ran and retries approaches that already failed. The symptom looks
+like a stubborn model; the cause is a missing join. Put the last few actions in Layer 4 next to the
+conversation, collapse consecutive repeats onto one line (a small model retrying in a loop will otherwise
+fill the block), and end with the instruction that makes it useful rather than decorative: *do not repeat
+what is listed here; if it failed, try something else.*
+
 Layer 0 is the one people need but rarely write down. You keep more than one chat open with your agent —
 one refactoring auth, one writing docs, one chasing a bug. Each thread has its own state: what was decided,
 what was ruled out, where it stopped. That state cannot go in Layer 1, because every other chat would then
