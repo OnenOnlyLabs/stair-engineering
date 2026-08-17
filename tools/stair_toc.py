@@ -160,6 +160,41 @@ def check():
         hint = "" if n < 3000 else ("  (over ~3 KB — too big for most local models; move a section into a room)" if n < 10000
                                     else "  (over ~10 KB — even cloud models skim at this size; move sections into rooms)")
         print(f"layer1: {n} bytes{hint}")
+    # ★Layer 4 는 파일이 아니라 매 호출 생성되는 블록이라, 죽어도 예외가 안 난다 —
+    #   블록이 조용히 비거나 낡아도 로그에 아무것도 안 남는다. 그래서 여기서 실제로 돌려본다.
+    #   (문서로 쓴 주의사항은 안 읽히지만 체커는 돌아간다.)
+    gen = ROOT / "tools" / "recent_work.py"
+    if not gen.exists():
+        print("NO LAYER 4  tools/recent_work.py missing — nothing delivers recent work at session start")
+        bad += 1
+    else:
+        import subprocess
+        try:
+            r = subprocess.run([sys.executable, str(gen), "--repo", str(ROOT)],
+                               capture_output=True, text=True, timeout=40)
+            block = (r.stdout or "").strip()
+            commits = subprocess.run(
+                ["git", "-C", str(ROOT), "log", "--since=7 days ago", "--oneline"],
+                capture_output=True, text=True, timeout=20).stdout.strip()
+            if r.returncode != 0:
+                print(f"LAYER 4 BROKEN  recent_work.py exited {r.returncode}: {(r.stderr or '')[:120]}")
+                bad += 1
+            elif not block and commits:
+                # 이게 조용한 죽음이다: 붙일 이력이 있는데 블록이 비어서 나간다.
+                print("LAYER 4 EMPTY  there is recent history but the block came out empty —")
+                print("               the delivery is broken; the agent will start every session blank")
+                bad += 1
+            elif not block:
+                print("layer4: empty (no recent commits — expected)")
+            else:
+                lines = block.count("\n") + 1
+                print(f"layer4: {lines} lines, {len(block)} bytes"
+                      + ("  (over ~1.5 KB — trim it; this is paid on every session start)"
+                         if len(block) > 1500 else ""))
+        except Exception as e:
+            print(f"LAYER 4 BROKEN  could not run recent_work.py: {str(e)[:100]}")
+            bad += 1
+
     l0 = ROOT / "stairs" / "layer0"
     if l0.exists():
         notes = [p for p in sorted(l0.glob("*.md")) if p.name != "README.md"]
