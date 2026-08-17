@@ -105,6 +105,26 @@ def route(query):
 
 
 
+
+# The file each tool reads on every call. Different name, same job.
+# If your tool is not here, --install still takes an explicit path.
+KNOWN_TARGETS = [
+    ("CLAUDE.md",       "Claude Code"),
+    ("AGENTS.md",       "Codex CLI / OpenAI agents"),
+    ("GEMINI.md",       "Gemini CLI"),
+    ("AGENT.md",        "Antigravity / generic"),
+    (".cursorrules",    "Cursor"),
+    (".clinerules",     "Cline"),
+    (".windsurfrules",  "Windsurf"),
+    (".github/copilot-instructions.md", "GitHub Copilot"),
+    ("GROK.md",         "Grok Build"),
+    (".rules",          "generic rules file"),
+]
+
+# Tools with no project file — the block goes in their system-prompt box.
+PROMPT_ONLY = ["Ollama", "LM Studio", "raw API / any chat UI"]
+
+
 # ── --install ────────────────────────────────────────────────────────────────
 # Why this exists: the loader could always write Layer 1 with `--out CLAUDE.md`,
 # but that OVERWRITES the file. Nobody runs that on a CLAUDE.md they already have,
@@ -150,6 +170,14 @@ def install_block(layer1_text, root):
     ])
 
 
+def install_targets(explicit):
+    """Which files to write. With no --install value, every known file that exists."""
+    if explicit and explicit != "auto":
+        return [Path(explicit)]
+    found = [Path(n) for n, _ in KNOWN_TARGETS if Path(n).exists()]
+    return found
+
+
 def do_install(target, layer1_text, root, dry_run=False):
     block = install_block(layer1_text, root)
     p = Path(target)
@@ -181,10 +209,11 @@ def main():
     ap.add_argument("--section", help="only this section of the room (title substring)")
     ap.add_argument("--route", help="pick rooms by keywords in this text")
     ap.add_argument("--full", action="store_true", help="with --room: print the whole file, not just the TOC")
-    ap.add_argument("--install", metavar="FILE",
-                    help="put Layer 1 + the routing rules into the file your agent reads every call "
-                         "(CLAUDE.md / AGENTS.md / .cursorrules). Appends a managed block — your own text is kept. "
-                         "Re-run to refresh it.")
+    ap.add_argument("--install", metavar="FILE", nargs="?", const="auto",
+                    help="put Layer 1 + the routing rules into the file your agent reads every call. "
+                         "With no FILE: every known agent file present here (CLAUDE.md, AGENTS.md, GEMINI.md, "
+                         ".cursorrules, .clinerules, .windsurfrules, copilot-instructions.md, GROK.md). "
+                         "Appends a managed block — your own text is kept. Re-run to refresh it.")
     ap.add_argument("--dry-run", action="store_true", help="with --install: show what would change, write nothing")
     ap.add_argument("--out", help="write the result to this file as UTF-8 (use this on Windows: PowerShell's > redirection saves UTF-16)")
     a = ap.parse_args()
@@ -194,12 +223,23 @@ def main():
     if not L1.exists():
         sys.exit(f"missing {L1} — Layer 1 is the one file you must have")
     l1_text = L1.read_text(encoding="utf-8").strip()
-    if a.install:
+    if a.install is not None:
         try:
             root = ROOT.relative_to(Path.cwd())
         except Exception:
             root = ROOT
-        sys.exit(do_install(a.install, l1_text, root, a.dry_run))
+        targets = install_targets(a.install)
+        if not targets:
+            print("no agent file found in this folder. Either name one:")
+            for n, tool in KNOWN_TARGETS:
+                print(f"    python3 tools/stair_load.py --install {n:<34} # {tool}")
+            print("\nor, for tools with no project file " + ", ".join(PROMPT_ONLY) + ":")
+            print("    python3 tools/stair_load.py            # print Layer 1 and paste it into the system prompt box")
+            sys.exit(1)
+        rc2 = 0
+        for tp in targets:
+            rc2 |= do_install(str(tp), l1_text, root, a.dry_run)
+        sys.exit(rc2)
     parts.append(l1_text)
 
     if a.chat:

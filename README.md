@@ -75,7 +75,7 @@ git clone https://github.com/OnenOnlyLabs/stair-engineering /tmp/stairs
 cp -r /tmp/stairs/stairs /tmp/stairs/tools ~/your-project/     # the stairs and the two tools, nothing else
 cd ~/your-project
 # Windows (PowerShell):  Copy-Item -Recurse C:\tmp\stairs\stairs,C:\tmp\stairs\tools C:\your-project\ ; cd C:\your-project
-python3 tools/stair_load.py --install CLAUDE.md      # ★ put the stair into the file your agent reads EVERY call
+python3 tools/stair_load.py --install                 # ★ put the stair into every agent file found here
 python3 tools/stair_load.py                          # Layer 1 — or paste it into your system prompt yourself
 python3 tools/stair_load.py --agent researcher       # + an identity card
 python3 tools/stair_load.py --route "check ranking"  # + the right room's TOC, picked by keywords
@@ -92,18 +92,30 @@ Then make the stairs yours: [`docs/creating-your-memory.md`](docs/creating-your-
 
 ## Use it with your tool
 
-- **Claude Code** — `python3 tools/stair_load.py --install CLAUDE.md`
-- **Codex CLI / OpenAI agents** — `--install AGENTS.md`
-- **Cursor / VS Code agents** — `--install .cursorrules`
+`python3 tools/stair_load.py --install` with no argument finds and updates **every agent file in the folder**:
+
+| tool | file |
+|---|---|
+| Claude Code | `CLAUDE.md` |
+| Codex CLI / OpenAI agents | `AGENTS.md` |
+| Gemini CLI | `GEMINI.md` |
+| Antigravity / generic | `AGENT.md` |
+| Cursor · Cline · Windsurf | `.cursorrules` · `.clinerules` · `.windsurfrules` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+| Grok Build | `GROK.md` |
+
+Name one explicitly with `--install FILE` if your tool uses a different path.
+**Ollama · LM Studio · raw API · any chat UI without a project file** — run `python3 tools/stair_load.py`
+and paste the output into the system-prompt box; re-paste after you change Layer 1.
 
 `--install` **appends a managed block** between `STAIR:BEGIN` / `STAIR:END` markers — your existing rules
 are kept, and re-running refreshes only that block. Use `--dry-run` first if you want to see the change.
 (`--out FILE` still exists and **overwrites** the file; use it for a fresh file, not for a CLAUDE.md you already have.)
 
-★ Why this matters more than it looks: the block also tells the agent **how to open the other layers**
-(`--route`, `--room`, `--agent`). Without it the agent holds Layer 1 and never learns that rooms exist —
-it keeps answering from memory. We shipped this repo for weeks before noticing our own agent had never been
-told; the staircase was in the project, not in the file the agent actually read.
+★ **Watch for this** — the block also tells the agent **how to open the other layers** (`--route`, `--room`,
+`--agent`). Without it the agent holds Layer 1 and never learns the rooms exist, so it keeps answering from
+memory and the staircase sits unused in your project. Copying the folder is not installing it: check that the
+file your agent actually reads contains the `STAIR:BEGIN` block, and re-run `--install` after you edit Layer 1.
 - **Gemini CLI / Antigravity** — into the project context file your tool reads.
 - **Ollama / LM Studio / raw API** — put the loader output in the `system` message. For local models Layer 1 size matters even more; keep it under ~3 KB.
 - **Any chat UI without a file system** — paste Layer 1 once as custom instructions; paste a room's section when the task needs it.
