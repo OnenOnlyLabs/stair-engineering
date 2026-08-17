@@ -33,7 +33,7 @@ The fix is not to remember harder. It is to make the harness deliver, on every s
 
 ```
 🧠 [last 36h you touched — most recent first]
-  scripts/recent_work.py · personas/slime.md · CLAUDE.md · personas/agtower.md
+  src/auth/session.ts · src/auth/tokens.ts · CLAUDE.md · stairs/layer3/reviewer.md
   📒 <last few ledger entries>
 ```
 
