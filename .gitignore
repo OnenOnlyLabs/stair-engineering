@@ -2,8 +2,12 @@ __pycache__/
 *.pyc
 .DS_Store
 README.ko.md
-CLAUDE.md
-AGENTS.md
+# CLAUDE.md / AGENTS.md are tracked on purpose — this repo installs the stair into its own
+# agent files so readers can see a real installed block. Regenerate with:
+#   python3 tools/stair_load.py --install
+# CLAUDE.md / AGENTS.md are tracked on purpose — this repo installs the stair into its own
+# agent files so readers can see a real installed block. Regenerate with:
+#   python3 tools/stair_load.py --install
 .cursorrules
 GEMINI.md
 Modelfile
