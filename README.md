@@ -56,8 +56,9 @@ is easy to inject only the first. The agent then remembers everything that was *
 *did*, so it re-runs commands it already ran and retries approaches that already failed. The symptom looks
 like a stubborn model; the cause is a missing join. Put the last few actions in Layer 4 next to the
 conversation, collapse consecutive repeats onto one line (a small model retrying in a loop will otherwise
-fill the block), and end with the instruction that makes it useful rather than decorative: *do not repeat
-what is listed here; if it failed, try something else.*
+fill the block), and end with an instruction the model can actually evaluate — a condition rather than a
+prohibition: *before running anything listed above, check its recorded result first.* "Do not repeat"
+leaves the model to decide what counts as the same thing on every turn, and that judgement drifts.
 
 Layer 0 is the one people need but rarely write down. You keep more than one chat open with your agent —
 one refactoring auth, one writing docs, one chasing a bug. Each thread has its own state: what was decided,

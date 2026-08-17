@@ -86,3 +86,16 @@ cheap to redo does not need to be in the block at all.
 
 Other things worth injecting here rather than hard-coding: the current branch, whether the working tree is
 dirty, and which environment the agent is pointed at. All situational, all cheap, all wrong to memorize.
+
+## Close with a condition, not a prohibition
+
+The last line of the block is an instruction, and its shape matters more than its content.
+
+    ✗  Do not repeat anything listed above.
+    ✓  Before running anything listed above, check its recorded result first.
+
+A bare prohibition gives the model nothing to evaluate: it has to decide what counts as "the same"
+on every turn, and that judgement drifts. A condition names a check it can actually perform. Several
+of our agents also report that naming a forbidden action tends to raise it rather than suppress it —
+that one is an observation from their own logs, not something we have isolated with a control, so
+treat it as a reason to prefer the conditional form rather than as a finding about negation.
