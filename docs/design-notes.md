@@ -41,3 +41,16 @@ several agents reading the same visible clues, not corroboration. Treat unanimit
 worth testing rather than as a result — and prefer the cheapest experiment that separates it from the
 alternative, changing one variable at a time. A rollback that also changes the question tells you
 nothing about either.
+
+## Why the recent-actions block clips the outcome
+
+The block carries what the agent did, which naturally includes what it said. Left at full length, an
+agent's own previous reply sitting in its context is indistinguishable from a worked example — and the
+smaller the model, the more readily it copies one. We measured this: given a four-line history and a
+one-word request, an agent returned an answer it had produced five minutes earlier for a different
+question, word for word, because that text was in its own block.
+
+Clipping the outcome to a short fragment keeps the useful signal (*this ran, here is roughly how it
+came out*) and removes the copyable surface. The closing line does the rest, and it works better as an
+instruction about the present than as a prohibition about the past: **respond to the current question
+only** gives the model something to do; *do not copy the above* only names the thing you don't want.

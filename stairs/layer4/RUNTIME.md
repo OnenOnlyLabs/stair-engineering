@@ -57,6 +57,12 @@ Three more failures show up the moment you build this, and none of them raise an
 - **Log what the agent was asked, not the envelope it arrived in.** Recipient lists and routing headers
   are prepended by your dispatcher, so a head-truncated record can preserve the wrapper and lose the
   entire question.
+- **Do not feed the agent long verbatim copies of its own past replies.** Smaller models read them as a
+  template rather than as history and reproduce one wholesale, answering a question you did not ask.
+  Keep the outcome short — a clipped line, not the full text — and say plainly what the block is:
+  *these are past records, not a model answer; respond to the current question only.* If you already
+  exclude the agent's own messages from the conversation history you inject, this is the same hazard
+  arriving through a different door.
 
 Layer 4 fails quietly by nature. The block still renders; only its contents go stale. Nothing throws,
 so nothing appears in the logs — which is why the checks belong in a tool, not in a page of advice.
