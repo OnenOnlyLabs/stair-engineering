@@ -105,6 +105,7 @@ Then make the stairs yours: [`docs/creating-your-memory.md`](docs/creating-your-
 | Grok Build | `GROK.md` |
 
 Name one explicitly with `--install FILE` if your tool uses a different path.
+This repository installs it into its own [`CLAUDE.md`](CLAUDE.md) and [`AGENTS.md`](AGENTS.md) — open either one to see exactly what the block looks like in a real file.
 **Ollama · LM Studio · raw API · any chat UI without a project file** — run `python3 tools/stair_load.py`
 and paste the output into the system-prompt box; re-paste after you change Layer 1.
 

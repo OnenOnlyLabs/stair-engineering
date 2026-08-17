@@ -6,13 +6,13 @@ The loader prints plain text. Put it where your tool reads instructions.
 
 ## Claude Code
 ```bash
-python3 tools/stair_load.py --agent builder --out CLAUDE.md
+python3 tools/stair_load.py --install CLAUDE.md      # appends; your existing rules are kept
 ```
 When a task needs a room, ask Claude to run `python3 tools/stair_load.py --room 201 --section indexing` and read the output. Or add one line to CLAUDE.md: "Before domain work, run the loader with --route and read the section it returns."
 
 ## Codex CLI / AGENTS.md
 ```bash
-python3 tools/stair_load.py --agent builder --out AGENTS.md
+python3 tools/stair_load.py --install AGENTS.md      # appends; your existing rules are kept
 ```
 
 ## Cursor / VS Code agent rules
@@ -40,3 +40,20 @@ Paste Layer 1 once as custom instructions. When the task needs a room, paste tha
 
 ## Several agents, several machines
 Pick one machine as the owner of `stairs/`. Push copies from there (rsync/scp) and verify by file count after each push. Restart agent processes after a push — a file arriving is not a process reloading it.
+
+## One command for all of them
+
+```bash
+python3 tools/stair_load.py --install        # finds every agent file in the folder and updates each
+python3 tools/stair_load.py --install --dry-run   # show what would change, write nothing
+```
+
+Recognised: `CLAUDE.md` · `AGENTS.md` · `GEMINI.md` · `AGENT.md` · `.cursorrules` · `.clinerules` ·
+`.windsurfrules` · `.github/copilot-instructions.md` · `GROK.md`. Name any other path with `--install FILE`.
+
+`--install` writes only between the `STAIR:BEGIN` / `STAIR:END` markers, so it is safe on a file you already
+have, and re-running refreshes just that block. `--out FILE` still exists and **replaces** the whole file —
+use it for a new file only.
+
+**Tools with no project file** (Ollama, LM Studio, raw API, chat UIs): run `python3 tools/stair_load.py`
+and paste the output into the system-prompt box. Re-paste after you change Layer 1.
