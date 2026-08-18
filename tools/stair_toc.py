@@ -107,6 +107,51 @@ def layer1_identity_warnings(text):
     return hits
 
 
+# ── Layer 3 must not hold shared facts ────────────────────────────────────────
+# The mirror image of the check above, and the one the author tripped over
+# second. Identity cards attract facts that belong to everyone: the model name
+# powering the agent, the roster of who else exists, the handle each teammate
+# answers to. They feel like identity ("I am the reviewer, I run on model X"),
+# so they get written into the card and then quietly rot — every card has to be
+# edited when one model is swapped, and the ones you forget start introducing
+# themselves by a version they stopped being months ago. Measured: an identity
+# card still announced a model two point releases old while the shared page had
+# the current one, and the agent used the stale value.
+#
+# Keep the shared facts on Layer 1, where there is exactly one copy, and let the
+# card carry only what is true of this role alone.
+SHARED_FACT_MARKERS = [
+    # model / version labels
+    "gpt-", "claude-", "gemini-", "llama-", "mistral", "opus ", "sonnet ", "haiku ",
+    "model:", "모델:", "version:", "버전:",
+    # roster and handles
+    "roster", "team list", "명단", "멤버 목록", "@",
+]
+
+# A card naturally says what it is NOT responsible for, and may point at Layer 1.
+SHARED_FACT_EXEMPT = ["layer 1", "layer1", "1층", "see the roster", "명단은", "정본"]
+
+
+def layer3_shared_fact_warnings(path):
+    """Lines in an identity card that look like facts shared by every role."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except Exception:
+        return []
+    hits = []
+    for i, ln in enumerate(text.splitlines(), 1):
+        low = ln.strip().lower()
+        if not low or low.startswith("#"):
+            continue
+        if any(x in low for x in SHARED_FACT_EXEMPT):
+            continue
+        for m in SHARED_FACT_MARKERS:
+            if m in low:
+                hits.append((i, ln.strip()[:70], m.strip()))
+                break
+    return hits
+
+
 def check():
     bad = 0
     l1 = L1.read_text(encoding="utf-8") if L1.exists() else ""
@@ -156,6 +201,16 @@ def check():
             print(f"IDENTITY IN L1  MEMORY.md:{lineno} — \"{snippet}\" (matched \"{marker}\")")
             print("                identity belongs in layer3; layer1 is what every role shares")
             bad += 1
+    l3dir = ROOT / "stairs" / "layer3"
+    if l3dir.exists():
+        for card in sorted(l3dir.glob("*.md")):
+            for lineno, snippet, marker in layer3_shared_fact_warnings(card):
+                print(f'SHARED FACT IN L3  {card.name}:{lineno} — "{snippet}" (matched "{marker}")')
+                print("                   model names, rosters and handles belong on Layer 1;")
+                print("                   duplicated here they go stale one card at a time")
+                bad += 1
+
+    if L1.exists():
         n = L1.stat().st_size
         hint = "" if n < 3000 else ("  (over ~3 KB — too big for most local models; move a section into a room)" if n < 10000
                                     else "  (over ~10 KB — even cloud models skim at this size; move sections into rooms)")

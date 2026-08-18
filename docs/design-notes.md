@@ -54,3 +54,20 @@ Clipping the outcome to a short fragment keeps the useful signal (*this ran, her
 came out*) and removes the copyable surface. The closing line does the rest, and it works better as an
 instruction about the present than as a prohibition about the past: **respond to the current question
 only** gives the model something to do; *do not copy the above* only names the thing you don't want.
+
+## Why the checker also guards Layer 3 in the other direction
+
+The first check we wrote catches identity leaking *down* into Layer 1. The failure we hit later ran
+the other way: shared facts leaking *up* into an identity card.
+
+They arrive disguised as identity. A card that says *"I am the reviewer, I run on <model>, ping
+<teammate> when I need a second opinion"* reads as a description of one role, and every word of it
+feels like it belongs there. But the model and the teammate are facts about the whole system, and now
+they exist once per card. Swap the model and you must edit every card; miss one and that agent keeps
+introducing itself by a version it stopped being. We measured exactly that — a card two point releases
+behind the shared page, and the agent answering from the card.
+
+The rule that survives is narrow: a card carries what is true of this role **and no other** — tone,
+judgement calls, the corrections this role specifically needs. Anything true of everyone goes on
+Layer 1, where there is one copy to age. `stair_toc.py check` now flags model labels, rosters and
+handles found in a card, because the spec alone did not stop the person who wrote the spec.

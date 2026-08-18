@@ -13,6 +13,8 @@ Layer 4   runtime       what your code injects on every call — today's date, t
                         recent turns. Not in any file, easy to forget you are paying for it.
 Layer 3   identity      one card per role — who it is, how it speaks. Optional.
                         Solo users: one card per *mode* (build / review / write), swapped per task.
+                        Keep shared facts out: model names, rosters and handles belong on Layer 1,
+                        or they go stale one card at a time. The checker flags them.
 Layer 2   knowledge     rooms by address (201, 202, 203…) — opened only when needed, one section at a time
 Layer 1   memory        ONE page — always loaded, every single call
 Layer 0   this chat      what THIS thread is working on — one file per chat, never auto-loaded
