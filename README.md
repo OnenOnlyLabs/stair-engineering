@@ -226,6 +226,53 @@ a tone meant editing a file full of rules that had nothing to do with tone.
 `stair_toc.py check` now flags identity-looking lines in Layer 1, because a spec that is merely correct
 does not stop this — a check does. A line that *points at* Layer 3 is fine; a line that tries to *be* the card is not.
 
+## The second mistake: a rule on the page is not a rule in the system
+
+Layer 1 is where you write what is always true. It is not where enforcement lives.
+
+We wrote *"propose the change, a human executes it"* into a role card and believed the system was safe.
+It was not. The same capability was also exposed as a tool, and anything that called that tool ran
+immediately — the sentence on the page never touched that path. The card was honest; the wiring was not.
+
+The fix was not a better sentence. It was a gate on the **action**, not on the words:
+
+```
+tool: stop_publishing(host)      ->  requires human approval, one-time, expires in 10 minutes
+tool: place_order(client)        ->  requires human approval
+tool: read_status(host)          ->  runs
+```
+
+Two things made this work where an earlier attempt had failed:
+
+- **Gate the action, not the request text.** An earlier version pattern-matched the user's words for
+  "delete", "stop", "reboot". It blocked ordinary sentences that merely mentioned those words, so we
+  turned it off — and were left with nothing. Gating the function call has almost no false positives.
+- **Fail closed, and say so out loud.** When approval is missing the tool returns "approval required"
+  and posts a request where a human will see it. Silence is the failure mode you never notice.
+
+Layer 1 still carries the rule, because agents should know it. But the rule is now *also* a gate.
+If a line in your Layer 1 describes a restriction, ask: what happens if the model ignores this line?
+If the answer is "nothing stops it", that line is a wish, not a rule.
+
+## Layer 4 needs an address, not just a copy
+
+Runtime injection is per-call, so it is tempting to give every machine its own copy of whatever it needs
+— the index, the model, the credentials. Every copy becomes a fork the moment it drifts.
+
+We hit this while adding one lookup tool across three machines. The first version ran only where it was
+built. Making it "work everywhere" by copying the pieces would have produced three answers to the same
+question within a week. What worked instead:
+
+- **One writer, many readers.** The index is built on one machine and pushed to the others. Nobody else builds it.
+- **Resolve the dependency at call time.** The embedding model lives on one host; the tool probes for it
+  locally, then falls back to that host. Same command everywhere, one source of truth.
+- **Verify on every host, not the one you built on.** We reported the tool as finished after testing on the
+  build machine. A reviewer ran it on a second machine, where it failed instantly. Two hosts, two different
+  causes — a missing library, then a console encoding that silently mangled non-ASCII output.
+
+If your Layer 4 injects something machine-specific, write down which machine owns it. "It works on mine"
+is not a status.
+
 ## Known limits (please read before you clone this into production)
 
 - **Layer 1 will try to grow.** Every incident adds "one more line". Set a soft budget and audit it; the tool only *shows* the size, it does not stop you.
