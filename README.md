@@ -1,5 +1,7 @@
 # Stair Engineering
 
+**[한국어 문서 →](README.ko.md)**
+
 **What you always read must be thin. Deep knowledge lives up the stairs.**
 
 ![Stair Engineering — five floors: this chat only, one always-loaded page, knowledge rooms opened by address, identity cards, and the runtime layer your harness injects](docs/hero.png)
