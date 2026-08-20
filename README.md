@@ -348,6 +348,41 @@ does not grow by a character, with no exceptions.
 need judgement go on Layer 1; things that can be decided mechanically go on Layer 4. Ask this first —
 **does this need to be read, or does it need to be executed?**
 
+## Not everything belongs on Layer 2 — there is a break-even
+
+Once the staircase clicks, it is tempting to empty Layer 1 as far as possible. **Do not.**
+
+What decides placement is not size. It is **how often the thing is read**.
+- Read on almost every call → **cheaper to keep on Layer 1.** Push it down and you pay to fetch it every time.
+- Large and **rarely** needed → Layer 2 wins. Move it into a room and keep only the address.
+
+★A staircase is not a device for pushing content away. It is a device for **placing content by how
+often it is actually read**.
+
+We measured our own Layer 1 section by section and ended up moving **nothing**. The largest section
+was the Layer 2 address list (30%), and the descriptions attached to each route *are* the mechanism
+that picks the right room — delete them and the staircase stops working.
+★**Do not demote something for being big. First measure whether it goes unread.**
+
+### Measure whether the work finishes better, not whether the page got smaller
+
+"Layer 1 shrank by N KB" is not a result. If it shrank and the answers got worse, that is a loss.
+
+★**Measure cost per completed task, not per token.** Finishing in one pass usually beats looping
+ten cheap times.
+
+### Caching means Layer 1 should not be edited often
+
+Modern harnesses **cache the unchanging prefix**. That cache breaks the moment the prefix changes by
+**a single character**. ★Layer 1 is by definition **the front of every call** — so **every edit to
+Layer 1 throws away everyone's cache.**
+
+Measured: we edited Layer 1 four times in one day. Fifteen agents lost their cache four times that day.
+
+- ★**Batch your Layer 1 edits.** Do not fix one line whenever it occurs to you.
+- Assemble **stable → volatile**. Date, recent turns and the question go **last**.
+  Put them first and the prefix differs on every call, so the cache never hits once.
+
 ## Known limits (please read before you clone this into production)
 
 - **Layer 1 will try to grow.** Every incident adds "one more line". Set a soft budget and audit it; the tool only *shows* the size, it does not stop you.
