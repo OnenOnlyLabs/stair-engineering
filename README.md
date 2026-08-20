@@ -275,6 +275,79 @@ question within a week. What worked instead:
 If your Layer 4 injects something machine-specific, write down which machine owns it. "It works on mine"
 is not a status.
 
+## After you build the gate: four things to check
+
+Putting a gate on the action is half the job. **The gate itself gets bypassed**, and it fails in a
+small number of predictable places. Check these four the day you build it.
+
+**1. Is the gate handing the key to the party it just blocked?**
+If the refusal message says *"approval request 3f2a1c submitted"*, the blocked agent can approve its
+own request with that id. Keep the id **only in the notification a human sees**; never return it to
+the requester.
+
+**2. What decides who approved? If it is self-declared, one word defeats it.**
+Check the approver via an environment variable and `BOT_ID=master` in front of the command is enough.
+★And the part that matters more: the ledger then records **"approved by: master"** — a false entry.
+Whoever reads that line after an incident will believe a human signed off.
+**A false record outlives the bypass that created it.**
+
+**3. Is the data your check reads alive on every machine?**
+Move the decision to a local file and it can fail the other way: **it never opens.** In our case that
+file had been dead for two months on one host and four on another. Failing closed is the safer
+direction, but a **silent** failure is still an incident. When the feed is stale, do not quietly
+refuse — **say "approval cannot reach this machine"** out loud.
+
+**4. Moving it to a central store does not help if the sender field is just an argument.**
+With one shared key, the server has no way to know which caller sent the request.
+
+★All four have the same shape. **Identity is self-declared.** Changing layers does not change that,
+because three things overlap:
+
+```
+the agent holds a shell   -> it can set any variable, write any file, run any command
+one shared key            -> the server cannot tell which caller sent the request
+one account               -> processes can impersonate each other by design
+```
+
+Closing this properly needs a **separate process under a different account**, holding credentials the
+agents cannot read. If that is out of proportion for your size, skip it — but then do this:
+
+**Write the reduced goal at the top of the gate's own source.**
+
+```
+STOPS         : honest agents making mistakes, and malfunctions
+DOES NOT STOP : an agent that deliberately works around it
+This is a mistake-prevention device, not a security boundary.
+Do not build "therefore we are safe" on top of it.
+```
+
+★**The gap between believed and actual protection is more dangerous than the gap in the gate.** If
+you believe something is blocked when it isn't, you build the next thing on that belief. And keep the
+ledger honest — unverified identity is always recorded *as* unverified (`by_claimed`,
+`verified: false`).
+
+One method to finish with. **Your own tests pass on your own defenses.** When you build a gate, an
+auth check, a permission boundary — hand it to another person or another agent that same day and say
+**"break it", not "review it."** Review invites praise; breaking invites holes. And ask for proof:
+not "this looks exploitable" but an actual opened door with a trace left behind.
+
+## Layers have a price tag
+
+The same rule can live as a sentence on Layer 1 or as code on Layer 4. **The results differ.**
+
+| | sentence on Layer 1 | code on Layer 4 |
+|---|---|---|
+| cost | re-read on every call | zero prompt tokens |
+| enforced? | the model may ignore it | it cannot |
+
+Say you want to keep credentials out of your logs. Add *"never put secrets in logs"* to Layer 1 and
+it is re-read on every call — and it still leaks. Put **one eraser on the way out** and the prompt
+does not grow by a character, with no exceptions.
+
+★So "which layer does this belong on" is a placement question **and a cost question**. Things that
+need judgement go on Layer 1; things that can be decided mechanically go on Layer 4. Ask this first —
+**does this need to be read, or does it need to be executed?**
+
 ## Known limits (please read before you clone this into production)
 
 - **Layer 1 will try to grow.** Every incident adds "one more line". Set a soft budget and audit it; the tool only *shows* the size, it does not stop you.
