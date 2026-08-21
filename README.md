@@ -290,11 +290,36 @@ from it" — and the read ledger showed zero opens. Not a lie: **the names sit o
 agent believed it had read them.** Knowing a name is not the same as opening the room. That
 sentence went straight into our Layer 1 the same day.
 
-The check is not re-reading your docs. Measure two things:
+★And when the notice is missing entirely, the failure is louder than silence. Asked to open a room,
+a seat with no how-to-open notice produced a confident filename that did not exist — in about two
+seconds. **A missing notice does not produce "I can't." It produces an invention.** So when you
+audit this, do not look for refusals. Look for answers that arrive too fast and cite something you
+cannot find.
+
+The check is not re-reading your docs. Measure three things:
 - **Injection check**: dump the prompt each agent actually receives from the assembly function and
   verify the how-to-open notice is in it. Not what your docs say — **what is actually delivered.**
+  ★Never establish this by asking the agent. Anything already in its prompt comes back out on
+  request: we asked agents to report a value printed in their own prompt and got that printed value
+  back verbatim — including from seats where the real value differed. **A self-report is an echo of
+  the context, not a reading of the world.** Run the assembly function and read its output instead.
 - **A read ledger**: log every open at the tool's execution point (a choke point the agent cannot
   bypass) — who, which room, which section. Then you never have to trust "I read it."
+  ★Stamp it at every seat type, not just one. Our rooms could be reached three different ways (an
+  executor that runs the call, a handler that injects the text, a tool hook on the command line).
+  Stamping one path gives you a ledger that looks healthy while most opens go unrecorded — and an
+  under-recording ledger is worse than none, because it reads as proof.
+- **Ask for a canary, not a title.** If you test whether an agent really opened a room, do not accept
+  a section title. Titles are guessable from the filename and the Layer 1 address list, and a guess
+  that happens to land passes. Ask instead for a string that only exists inside: absent from the
+  table of contents, not derivable from the filename, appearing at most a few times in the file.
+  Script names, config keys and measured numbers work well — across our own rooms 25 of 27 could
+  produce one; the two that could not were short and purely conceptual, and there you quote a
+  sentence and compare it character by character. Match it **exactly, by machine**: what let a guess
+  through was "close enough", and leaving room for judgement re-opens the same hole.
+  ★Know what it proves. A canary shows the content is known — **not that the room was opened just
+  now.** If the file is already in the context the agent passes without opening anything. For actual
+  opens, read the ledger. They are two different questions; do not let one answer both.
 
 ★Re-run this check every time you move things between layers. We once relocated the notice during
 a token diet; the old location became dead code and the notice silently died with it.
