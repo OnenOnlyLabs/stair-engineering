@@ -275,6 +275,31 @@ question within a week. What worked instead:
 If your Layer 4 injects something machine-specific, write down which machine owns it. "It works on mine"
 is not a status.
 
+## Layer 2 wasn't actually being opened — a trap we walked into ourselves
+
+We had built the staircase, published the write-up, even shipped the video — and only then
+discovered that **of our fifteen agents, exactly two could actually open Layer 2.**
+
+The doors (knowledge rooms) existed. The hands (a read tool) were wired to everyone.
+What was missing was one thing: **the notice saying "these doors exist, and here is how you open
+them" was being injected into only two agents.** The rest knew room *names* from the Layer 1
+address list — so everything looked fine from the outside.
+
+★How it surfaced is the scary part. One agent answered "I read the Layer 2 design room and built
+from it" — and the read ledger showed zero opens. Not a lie: **the names sit on Layer 1, so the
+agent believed it had read them.** Knowing a name is not the same as opening the room. That
+sentence went straight into our Layer 1 the same day.
+
+The check is not re-reading your docs. Measure two things:
+- **Injection check**: dump the prompt each agent actually receives from the assembly function and
+  verify the how-to-open notice is in it. Not what your docs say — **what is actually delivered.**
+- **A read ledger**: log every open at the tool's execution point (a choke point the agent cannot
+  bypass) — who, which room, which section. Then you never have to trust "I read it."
+
+★Re-run this check every time you move things between layers. We once relocated the notice during
+a token diet; the old location became dead code and the notice silently died with it.
+**If you move where something lives, verify the delivery moved too.**
+
 ## After you build the gate: four things to check
 
 Putting a gate on the action is half the job. **The gate itself gets bypassed**, and it fails in a
