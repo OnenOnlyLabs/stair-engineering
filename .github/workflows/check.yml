@@ -1,0 +1,21 @@
+name: stairs-check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # The repo checks itself with its own tool: unrouted rooms, dead links,
+      # TOCs older than the file they describe.
+      - name: Stair wiring check
+        run: python3 tools/stair_toc.py check
+      - name: Python syntax check
+        run: python3 -m py_compile tools/*.py
